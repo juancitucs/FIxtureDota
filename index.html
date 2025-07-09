@@ -257,10 +257,13 @@
         );
 
         // recorrer resultados y acumular
-        results.forEach((m) => {
-          if (!m.result) return;
+        results.forEach(m => {
           const r = (m.result || "").trim();
+          // Saltar si no hay resultado real
           if (!r || r === "0 - 0") return;
+
+          const [s1, s2] = r.split("-").map(x => Number(x.trim()));
+          if (isNaN(s1) || isNaN(s2)) return;
 
           let p1 = 0,
             p2 = 0;
