@@ -154,57 +154,53 @@
   </div>
 
   <script>
-    // --- CONFIGURACIÓN MANUAL DE RESULTADOS ---
-    // Cambia los valores de 'playin' y 'final' para actualizar el bracket.
+    // --- CONFIGURACIÓN MANUAL DEL BRACKET ---
+
+    // 1. Define los equipos que jugarán.
+    const teams = {
+      top1: "Equipo A (1º)", // Pasa directo a la final
+      top2: "Equipo B (2º)", // Juega el play-in
+      top3: "Equipo C (3º)"  // Juega el play-in
+    };
+
+    // 2. Cambia los resultados para actualizar el bracket.
     // Formato: "X-Y". Dejar en "" para no mostrar resultado.
     const scores = {
       playin: "", // Ejemplo: "2-1"
       final: ""     // Ejemplo: "3-2"
     };
+    
     // -----------------------------------------
 
-    const results = JSON.parse(localStorage.getItem('dotaResults6T3')) || [];
-    const stats = {};
-    results.forEach(m => {
-      if (!m.result) return;
-      [m.t1, m.t2].forEach(t => { if (!stats[t]) stats[t] = { Pts:0 }; });
-      const [s1, s2] = m.result.split('-').map(Number);
-      let p1 = 0, p2 = 0;
-      if (s1 > s2) p1 = 3;
-      else if (s2 > s1) p2 = 3;
-      else { p1 = 1; p2 = 1; }
-      stats[m.t1].Pts += p1;
-      stats[m.t2].Pts += p2;
-    });
-    const standings = Object.entries(stats)
-      .map(([team,s]) => ({ team, ...s }))
-      .sort((a,b) => b.Pts - a.Pts);
-    const top3 = standings.slice(0,3).map(r => r.team);
+    // Poner equipos iniciales en el HTML
+    document.getElementById('team1-playin').textContent = teams.top2 || '-';
+    document.getElementById('team2-playin').textContent = teams.top3 || '-';
+    document.getElementById('team1-final').textContent = teams.top1 || '-';
 
-    // Poner equipos iniciales
-    document.getElementById('team1-playin').textContent = top3[1] || '-';
-    document.getElementById('team2-playin').textContent = top3[2] || '-';
-    document.getElementById('team1-final').textContent = top3[0] || '-';
-
-    // Actualizar bracket tras resultados
+    // Actualizar bracket según los resultados
     function updateBracket() {
       const playinScore = scores.playin;
       const finalScore = scores.final;
 
+      // Actualiza el marcador del play-in
       document.getElementById('score-playin').textContent = playinScore || '--';
 
+      // Determina el ganador del play-in y lo pone en la final
       let finalTeam2 = '-';
       if (playinScore) {
         const [s1, s2] = playinScore.split('-').map(Number);
-        const winner = s1 > s2 ? top3[1] : top3[2];
+        const winner = s1 > s2 ? teams.top2 : teams.top3;
         finalTeam2 = winner || '-';
       }
       document.getElementById('team2-final').textContent = finalTeam2;
 
+      // Actualiza el marcador de la final
       document.getElementById('score-final').textContent = finalScore || '--';
+      
+      // Determina el campeón
       if (finalScore) {
         const [s1, s2] = finalScore.split('-').map(Number);
-        const finalTeam1 = top3[0] || '-';
+        const finalTeam1 = teams.top1 || '-';
         const champ = s1 > s2 ? finalTeam1 : finalTeam2;
         document.getElementById('champion-text').textContent = 'Campeón: ' + champ;
       } else {
@@ -212,7 +208,7 @@
       }
     }
     
-    // No se necesitan listeners, solo se llama una vez al cargar.
+    // Cargar el estado del bracket al iniciar la página.
     updateBracket();
   </script>
 </body>
