@@ -259,8 +259,8 @@
         // recorrer resultados y acumular
         results.forEach((m) => {
           if (!m.result) return;
-          const [s1, s2] = m.result.split("-").map(Number);
-          if (Number.isNaN(s1) || Number.isNaN(s2)) return;
+          const r = (m.result || "").trim();
+          if (!r || r === "0 - 0") return;
 
           let p1 = 0,
             p2 = 0;
