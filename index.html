@@ -361,17 +361,6 @@
           tb.appendChild(tr);
         });
       }
-      // Función para reiniciar todos los resultados
-      function resetMatches() {
-        results.forEach(m => m.result = "");
-        renderSchedule();
-        updateStandings();
-      }
-
-      // Conectar el botón de reinicio
-      document.getElementById("reset-btn")
-              .addEventListener("click", resetMatches);
-      
 
       /* === Inicio === */
       selectTab("round-1");
