@@ -1,0 +1,171 @@
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Montserrat:wght@500;600&display=swap');
+
+/* ---------- Variables ---------- */
+:root{
+  --text          : #f8faff;
+  --accent        : #ffcc00;
+  --accent-light  : #fff2a6;
+  --accent-green  : #29ffb0;
+  --glass-bg      : rgba(22,22,30,.60);
+  --glass-head    : rgba(48,35,80,.85);
+  --row-alt       : rgba(255,255,255,.04);
+  --row-hover     : rgba(255,255,255,.10);
+}
+
+/* ---------- Fondo ---------- */
+body{
+  margin:0;padding:20px;
+  font-family:'Segoe UI',Tahoma,sans-serif;
+  color:var(--text);
+  background:
+    linear-gradient(to top,rgba(0,0,0,.60),rgba(0,0,0,.35)),
+    url('imagen01.jpg') center/cover fixed;
+  background-blend-mode:darken;
+}
+
+/* ---------- Títulos ---------- */
+h1,h2{
+  font-family:'Cinzel',serif;
+  text-transform:uppercase;
+  letter-spacing:3px;
+  margin:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+h1{
+  font-size:2.35rem;
+  background:linear-gradient(90deg,var(--accent),var(--accent-light) 55%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 8px rgba(0,0,0,.9));
+}
+h2{
+  font-size:1.8rem;color:var(--accent-light);
+  text-shadow:0 0 8px rgba(0,0,0,.9);margin-bottom:18px;
+}
+
+/* ---------- Header ---------- */
+header{
+  position:sticky;top:0;z-index:100;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 24px;margin:-20px -20px 30px;
+  background:rgba(0,0,0,.52);backdrop-filter:blur(10px);
+}
+header h1{position:absolute;left:50%;transform:translateX(-50%);}
+#toggle-theme{background:none;border:none;font-size:1.35rem;color:var(--accent);cursor:pointer;margin-right:10px;}
+
+/* -------------------------------------------------
+   BOTONES (se aplica a .button, button y pestañas)
+   ------------------------------------------------- */
+button,.button,.tab-btn,
+button:link,.button:link,.tab-btn:link,
+button:visited,.button:visited,.tab-btn:visited{
+  display:inline-block;
+  background:linear-gradient(160deg,var(--accent) 0%,var(--accent-light) 100%);
+  color:#1b1505;text-decoration:none;
+  border:none;border-radius:8px;
+  padding:11px 26px;margin:6px;
+  font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:.5px;
+  cursor:pointer;
+  box-shadow:0 0 14px rgba(255,200,0,.55);
+  transition:transform .18s,box-shadow .18s,filter .18s;
+}
+button:hover,.button:hover,.tab-btn:hover{
+  transform:translateY(-3px);
+  filter:brightness(1.05);
+  box-shadow:0 0 18px rgba(255,215,0,.85);
+}
+
+/* Pestaña activa = verde brillante */
+.tab-btn.active{
+  background:var(--accent-green) !important;
+  color:#003a29 !important;
+  box-shadow:0 0 18px rgba(41,255,176,.65) !important;
+}
+
+/* ---------- Contenedor de pestañas ---------- */
+.tabs{display:flex;justify-content:center;flex-wrap:wrap;margin:18px 0;}
+
+/* ---------- Tabla ---------- */
+table{
+  width:100%;max-width:1020px;margin:0 auto 34px;border-collapse:collapse;
+  background:var(--glass-bg);backdrop-filter:blur(13px) saturate(160%);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:0 8px 26px rgba(0,0,0,.78);
+}
+th,td{padding:10px 8px;text-align:center;font-family:'Montserrat',sans-serif;}
+th{
+  background:var(--glass-head);
+  color:var(--accent-green);
+  font-weight:700;font-size:.92rem;
+  border-bottom:2px solid var(--accent);
+}
+tbody tr:nth-child(even){background:var(--row-alt);}
+tbody tr:hover{background:var(--row-hover);}
+td img{width:24px;margin-right:5px;vertical-align:middle;}
+
+/* Selector resultado */
+.select-score{
+  width:80px;padding:4px 6px;background:#181225;color:var(--text);
+  border:1px solid var(--accent);border-radius:5px;
+}
+
+/* Top-4 resaltado */
+.playoff{
+  background:rgba(41,255,176,.14)!important;
+  box-shadow:inset 4px 0 0 var(--accent-green),inset 0 0 12px var(--accent-green);
+}
+
+/* ---------- Bracket / Llaves ---------- */
+.match{
+  background:var(--glass-bg)!important;
+  border:3px solid var(--accent);
+  border-radius:10px;
+  box-shadow:0 0 20px rgba(255,210,0,.55);
+}
+.match .header{
+  background:linear-gradient(90deg,var(--accent),var(--accent-light));
+  color:#1b1505;font-weight:700;
+}
+
+/* ---------- Campeón ---------- */
+.champion{
+  width:320px;height:320px;
+  background:radial-gradient(circle at 50% 35%,rgba(255,255,255,.25) 0%,rgba(255,255,255,0) 60%),rgba(255,215,0,.18);
+  border:5px solid var(--accent);border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  box-shadow:0 0 32px var(--accent-light),0 0 80px rgba(255,215,0,.6);
+  animation:glowChampion 2s ease-in-out infinite alternate;
+}
+.champion .trophy{font-size:6rem;line-height:1;}
+.champion-text{font-family:'Cinzel',serif;font-size:1.6rem;color:var(--accent-light);text-shadow:0 0 10px #000;margin-top:14px;}
+
+@keyframes glowChampion{
+  from{box-shadow:0 0 28px var(--accent-light),0 0 70px rgba(255,215,0,.45);}
+  to  {box-shadow:0 0 44px var(--accent-light),0 0 100px rgba(255,215,0,.80);}
+}
+
+/* ---------- Stats cards ---------- */
+.stat-card{
+  flex:1 1 190px;background:var(--glass-bg);
+  backdrop-filter:blur(13px) saturate(170%);
+  border:1px solid rgba(255,255,255,.14);border-radius:9px;
+  padding:22px 14px;text-align:center;
+  box-shadow:0 6px 18px rgba(0,0,0,.75);
+}
+.stat-card h3{font-size:.92rem;color:var(--accent-green);margin:0 0 10px;letter-spacing:.5px;font-weight:600;}
+.stat-card p {font-size:1.7rem;margin:0;font-weight:700;}
+
+/* ---------- Fade & Responsive ---------- */
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1}}
+.fade-in{animation:fadeIn .45s ease;}
+
+@media(max-width:720px){
+  body{padding:14px;}table{font-size:.9rem;}
+  header{flex-direction:column;gap:10px;margin:-14px -14px 28px;}
+  h1{font-size:1.65rem;}
+}
+
+/* Reducir fuente de tablas */
+.standings-section table th,
+.standings-section table td{font-size:.74em;}
+.schedule-section table th,
+.schedule-section table td {font-size:.85em;}

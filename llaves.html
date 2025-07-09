@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Playoff - Top 3</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Bracket grid para Top 3 */
+    .bracket {
+      display: grid;
+      grid-template-areas: "playin final";
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+      gap: 40px;
+      margin: 40px auto;
+      max-width: 800px;
+    }
+    .match {
+      background: var(--table-bg);
+      border: 2px solid var(--accent);
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    #playin { grid-area: playin; }
+    #final  { grid-area: final; }
+    .header {
+      background: var(--accent);
+      color: var(--bg-start);
+      padding: 8px;
+      text-align: center;
+      font-family: 'Cinzel', serif;
+      font-size: 1rem;
+      text-transform: uppercase;
+      border-radius: 4px 4px 0 0;
+    }
+    .body {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-family: 'Montserrat', sans-serif;
+    }
+    .teams {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .teams span {
+      flex: 1;
+      text-align: center;
+      font-weight: 600;
+      white-space: normal;
+      word-break: break-word;
+      font-size: 0.9rem;
+    }
+    .select-score {
+      width: 80px;
+      padding: 6px;
+      background: #2b303b;
+      color: var(--text);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      margin: 0 8px;
+    }
+    .footer {
+      background: #222;
+      color: #ccc;
+      padding: 6px;
+      text-align: center;
+      font-size: 0.85rem;
+      font-family: 'Montserrat', sans-serif;
+      border-radius: 0 0 4px 4px;
+    }
+    .champion-container {
+      margin-top: 50px;
+      text-align: center;
+    }
+    .champion {
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 260px;
+      height: 260px;
+      background: radial-gradient(circle at top, rgba(255,204,0,0.2), transparent);
+      border-radius: 50%;
+      padding: 20px;
+      box-shadow: 0 0 15px var(--accent);
+      animation: glow 1.5s ease-in-out infinite alternate;
+    }
+    .champion .trophy {
+      font-size: 5rem;
+      line-height: 1;
+    }
+    .champion-text {
+      font-family: 'Cinzel', serif;
+      font-size: 1.4rem;
+      color: var(--accent);
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+      margin-top: 12px;
+      word-wrap: break-word;
+      padding: 0 10px;
+    }
+    @keyframes glow {
+      from { box-shadow: 0 0 10px var(--accent); }
+      to   { box-shadow: 0 0 30px #ffd633; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Playoff - Top 3</h1>
+  <div class="bracket">
+
+    <!-- Play-in -->
+    <div class="match" id="playin">
+      <div class="header">Play-in (2.º vs 3.º) - BO3</div>
+      <div class="body">
+        <div class="teams">
+          <span id="team1-playin"></span>
+          <select id="score-playin" class="select-score">
+            <option value="">--</option>
+            <option value="2-0">2-0</option>
+            <option value="2-1">2-1</option>
+            <option value="1-2">1-2</option>
+            <option value="0-2">0-2</option>
+          </select>
+          <span id="team2-playin"></span>
+        </div>
+      </div>
+      <div class="footer">26/07 · 14:00</div>
+    </div>
+
+    <!-- Final -->
+    <div class="match" id="final">
+      <div class="header">Final - BO5</div>
+      <div class="body">
+        <div class="teams">
+          <span id="team1-final"></span>
+          <select id="score-final" class="select-score">
+            <option value="">--</option>
+            <option value="3-0">3-0</option>
+            <option value="3-1">3-1</option>
+            <option value="3-2">3-2</option>
+            <option value="2-3">2-3</option>
+            <option value="1-3">1-3</option>
+            <option value="0-3">0-3</option>
+          </select>
+          <span id="team2-final"></span>
+        </div>
+      </div>
+      <div class="footer">26/07 · 18:00</div>
+    </div>
+
+  </div>
+
+  <div class="champion-container">
+    <div class="champion">
+      <div class="trophy">🏆</div>
+      <div class="champion-text" id="champion-text">Campeón: -</div>
+    </div>
+  </div>
+
+  <script>
+    const results = JSON.parse(localStorage.getItem('dotaResults6T3')) || [];
+    const stats = {};
+    results.forEach(m => {
+      if (!m.result) return;
+      [m.t1, m.t2].forEach(t => { if (!stats[t]) stats[t] = { Pts:0 }; });
+      const [s1, s2] = m.result.split('-').map(Number);
+      let p1 = 0, p2 = 0;
+      if (s1 > s2) p1 = 3;
+      else if (s2 > s1) p2 = 3;
+      else { p1 = 1; p2 = 1; }
+      stats[m.t1].Pts += p1;
+      stats[m.t2].Pts += p2;
+    });
+    const standings = Object.entries(stats)
+      .map(([team,s]) => ({ team, ...s }))
+      .sort((a,b) => b.Pts - a.Pts);
+    const top3 = standings.slice(0,3).map(r => r.team);
+
+    // Poner equipos iniciales
+    document.getElementById('team1-playin').textContent = top3[1] || '-';
+    document.getElementById('team2-playin').textContent = top3[2] || '-';
+    document.getElementById('team1-final').textContent = top3[0] || '-';
+
+    // Actualizar bracket tras resultados
+    function updateBracket() {
+      const playin = document.getElementById('score-playin').value;
+      if (playin) {
+        const [a,b] = playin.split('-').map(Number);
+        const winner = a > b ? top3[1] : top3[2];
+        document.getElementById('team2-final').textContent = winner;
+      }
+      const final = document.getElementById('score-final').value;
+      if (final) {
+        const [a,b] = final.split('-').map(Number);
+        const champ = a > b ?
+          document.getElementById('team1-final').textContent :
+          document.getElementById('team2-final').textContent;
+        document.getElementById('champion-text').textContent = 'Campeón: ' + champ;
+      }
+    }
+    ['playin','final'].forEach(id => {
+      document.getElementById(`score-${id}`).addEventListener('change', updateBracket);
+    });
+    updateBracket();
+  </script>
+</body>
+</html>
