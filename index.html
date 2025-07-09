@@ -1,275 +1,371 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Fixture Torneo Dota 2 – UNAM</title>
-  <link rel="stylesheet" href="styles.css" />
-  <style>
-    /* Colorea filas Top 3 y empates destacados */
-    .playoff {background:#e7f9e7;}
-    .tie     {background:#fff7e6;}
-  </style>
-</head>
-
-<body>
-  <!-- ---------- HEADER ---------- -->
-  <header>
-    <h1>CLASIFICATORIAS UNAM – DOTA 2</h1>
-    <div>
-      <button onclick="window.location.href='llaves.html'">
-        Ver Llaves Top 3
-      </button>
-    </div>
-  </header>
-
-  <!-- ---------- PESTAÑAS ---------- -->
-  <nav class="tabs">
-    <button class="tab-btn" data-tab="round-1">Fecha 1</button>
-    <button class="tab-btn" data-tab="round-2">Fecha 2</button>
-    <button class="tab-btn" data-tab="round-3">Fecha 3</button>
-    <button class="tab-btn" data-tab="round-4">Fecha 4</button>
-    <button class="tab-btn" data-tab="round-5">Fecha 5</button>
-    <button class="tab-btn" data-tab="standings">Tabla Posiciones</button>
-  </nav>
-
-  <!-- ---------- FIXTURE ---------- -->
-  <section class="schedule-section">
-    <h2 id="schedule-title">Fixture (Selecciona una fecha)</h2>
-    <table id="schedule">
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>Ronda</th>
-          <th>Equipo 1</th>
-          <th>Resultado</th>
-          <th>Equipo 2</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </section>
-
-  <!-- ---------- TABLA DE POSICIONES ---------- -->
-  <section class="standings-section" style="display:none;">
-    <h2>Tabla de Posiciones</h2>
-    <table id="standings">
-      <thead>
-        <tr>
-          <th>Pos</th><th>Equipo</th><th>PG</th><th>PE</th><th>PP</th><th>JG</th><th>DG</th><th>Pts</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-    <p style="font-size:0.9em;margin-top:0.5rem;">
-      <strong>Criterios de desempate</strong>: Pts → Diferencia de juegos (DG) → Juegos ganados (JG) → Enfrentamiento directo (2-way tie) → Partido desempate.
-    </p>
-  </section>
-
-  <!-- ---------- SCRIPT ---------- -->
-  <script>
-  /* === Configuración general === */
-  const PLAYOFF_SLOTS = 3;               // Top 3
- const STORAGE_KEY = "dotaResults6T3_v2";
-
-
-  /* === Datos de equipos y logos === */
-  const teams = [
-    "GANG OF MONKEYS",
-    "LOS 5 RATONES",
-    "BLACK STARS",
-    "INVALIDS",
-    "WAWITAS SAGACES",
-    "BAJITOS PERO SOBERBIOS"
-  ];
-
-  const logos = {
-    "GANG OF MONKEYS": "gankofmonkeys.jpg",
-    "LOS 5 RATONES": "loscinco.jpg",
-    "BLACK STARS": "blackstars.jpg",
-    "INVALIDS": "invalids.jpg",
-    "WAWITAS SAGACES": "wawitas-sagaces.jpg",
-    "BAJITOS PERO SOBERBIOS": "bajitosperosoberbios.jpg"
-  };
-
-  /* === Generar rondas (round-robin) === */
-  function buildRounds(list){
-    const arr=[...list];
-    if(arr.length%2) arr.push(null); // bye si impares
-    const n=arr.length, rounds=[];
-    for(let r=0;r<n-1;r++){
-      const pairs=[];
-      for(let i=0;i<n/2;i++){
-        const t1=arr[i], t2=arr[n-1-i];
-        if(t1&&t2) pairs.push({t1,t2});
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fixture Torneo Dota 2 – UNAM</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      /* Colorea filas Top 3 y empates destacados */
+      .playoff {
+        background: #e7f9e7;
       }
-      rounds.push(pairs);
-      arr.splice(1,0,arr.pop()); // rotación
-    }
-    return rounds;
-  }
+      .tie {
+        background: #fff7e6;
+      }
+    </style>
+  </head>
 
-  /* Fechas de juego (1 cada 2 días desde 5 jul 2025) */
-  const dates = [
-    "2025-07-14",
-    "2025-07-16",
-    "2025-07-18",
-    "2025-07-19",
-    "2025-07-20"
-  ];
+  <body>
+    <!-- ---------- HEADER ---------- -->
+    <header>
+      <h1>CLASIFICATORIAS UNAM – DOTA 2</h1>
+      <div>
+        <button onclick="window.location.href='llaves.html'">
+          Ver Llaves Top 3
+        </button>
+      </div>
+    </header>
 
-  const rawRounds = buildRounds(teams);
-  const schedule  = [];
-  dates.forEach((d,i)=> rawRounds[i].forEach(m=>schedule.push({r:i+1,d,t1:m.t1,t2:m.t2})) );
+    <!-- ---------- PESTAÑAS ---------- -->
+    <nav class="tabs">
+      <button class="tab-btn" data-tab="round-1">Fecha 1</button>
+      <button class="tab-btn" data-tab="round-2">Fecha 2</button>
+      <button class="tab-btn" data-tab="round-3">Fecha 3</button>
+      <button class="tab-btn" data-tab="round-4">Fecha 4</button>
+      <button class="tab-btn" data-tab="round-5">Fecha 5</button>
+      <button class="tab-btn" data-tab="standings">Tabla Posiciones</button>
+    </nav>
 
-  /* === Resultados en localStorage === */
-  let results = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-  if(results.length !== schedule.length){
-    results = schedule.map(m=>({...m,result:""}));
-  }
-  const saveResults = () => localStorage.setItem(STORAGE_KEY, JSON.stringify(results));
+    <!-- ---------- FIXTURE ---------- -->
+    <section class="schedule-section">
+      <h2 id="schedule-title">Fixture (Selecciona una fecha)</h2>
+      <table id="schedule">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Ronda</th>
+            <th>Equipo 1</th>
+            <th>Resultado</th>
+            <th>Equipo 2</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
 
-  /* === Referencias DOM === */
-  const tabs             = document.querySelectorAll(".tab-btn");
-  const scheduleSection  = document.querySelector(".schedule-section");
-  const standingsSection = document.querySelector(".standings-section");
-  const scheduleTitle    = document.getElementById("schedule-title");
+    <!-- ---------- TABLA DE POSICIONES ---------- -->
+    <section class="standings-section" style="display: none">
+      <h2>Tabla de Posiciones</h2>
+      <table id="standings">
+        <thead>
+          <tr>
+            <th>Pos</th>
+            <th>Equipo</th>
+            <th>PG</th>
+            <th>PE</th>
+            <th>PP</th>
+            <th>JG</th>
+            <th>DG</th>
+            <th>Pts</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p style="font-size: 0.9em; margin-top: 0.5rem">
+        <strong>Criterios de desempate</strong>: Pts → Diferencia de juegos (DG)
+        → Juegos ganados (JG) → Enfrentamiento directo (2-way tie) → Partido
+        desempate.
+      </p>
+    </section>
 
-  /* === Navegación por pestañas === */
-  let selectedTab="round-1";
-  function selectTab(tab){
-    selectedTab=tab;
-    tabs.forEach(b=>b.classList.toggle("active", b.dataset.tab===tab));
-    if(tab==="standings"){
-      scheduleSection.style.display="none";
-      standingsSection.style.display="block";
-    }else{
-      scheduleSection.style.display="block";
-      standingsSection.style.display="none";
-      scheduleTitle.textContent=`Fixture – Ronda ${tab.split('-')[1]}`;
-    }
-    renderSchedule();
-  }
-  tabs.forEach(b=>b.addEventListener("click",()=>selectTab(b.dataset.tab)));
+    <!-- ---------- SCRIPT ---------- -->
+    <script>
+      /*
+      ==================================================================
+      ==                                                              ==
+      ==    CONFIGURACIÓN DE RESULTADOS DEL TORNEO                    ==
+      ==                                                              ==
+      ==    Instrucciones:                                            ==
+      ==    Modifica los valores en la variable `matchResults`        ==
+      ==    para actualizar la tabla de posiciones y los fixtures.    ==
+      ==                                                              ==
+      ==    - Cada línea representa un partido en el orden que se     ==
+      ==      generan automáticamente.                                ==
+      ==    - El formato del resultado debe ser "X - Y".              ==
+      ==    - Si un partido aún no se ha jugado, usa "" (comillas).   ==
+      ==                                                              ==
+      ==================================================================
+      */
+      const matchResults = [
+        // Fecha 1
+        "2 - 0", // GANG OF MONKEYS vs BAJITOS PERO SOBERBIOS
+        "1 - 1", // LOS 5 RATONES vs WAWITAS SAGACES
+        "0 - 2", // BLACK STARS vs INVALIDS
+        // Fecha 2
+        "2 - 0", // GANG OF MONKEYS vs INVALIDS
+        "1 - 1", // WAWITAS SAGACES vs BLACK STARS
+        "0 - 2", // BAJITOS PERO SOBERBIOS vs LOS 5 RATONES
+        // Fecha 3
+        "2 - 0", // LOS 5 RATONES vs GANG OF MONKEYS
+        "1 - 1", // BLACK STARS vs BAJITOS PERO SOBERBIOS
+        "0 - 2", // INVALIDS vs WAWITAS SAGACES
+        // Fecha 4
+        "2 - 0", // GANG OF MONKEYS vs WAWITAS SAGACES
+        "1 - 1", // BAJITOS PERO SOBERBIOS vs INVALIDS
+        "0 - 2", // LOS 5 RATONES vs BLACK STARS
+        // Fecha 5
+        "2 - 0", // BLACK STARS vs GANG OF MONKEYS
+        "1 - 1", // INVALIDS vs LOS 5 RATONES
+        "0 - 2", // WAWITAS SAGACES vs BAJITOS PERO SOBERBIOS
+      ];
 
-  /* === Renderizar fixture === */
-  function renderSchedule(){
-    const tbody=document.querySelector("#schedule tbody");
-    tbody.innerHTML="";
-    results.forEach((m,i)=>{
-      if(selectedTab.startsWith("round-") && m.r!==+selectedTab.split("-")[1]) return;
-      const tr=document.createElement("tr");
+      /* === Configuración general === */
+      const PLAYOFF_SLOTS = 3; // Top 3
 
-      // fecha y ronda
-      ["d","r"].forEach(f=>{const td=document.createElement("td");td.textContent=m[f];tr.appendChild(td);});
+      /* === Datos de equipos y logos === */
+      const teams = [
+        "GANG OF MONKEYS",
+        "LOS 5 RATONES",
+        "BLACK STARS",
+        "INVALIDS",
+        "WAWITAS SAGACES",
+        "BAJITOS PERO SOBERBIOS",
+      ];
 
-      // equipo 1
-      const td1=document.createElement("td");
-      td1.innerHTML=`<img src="${logos[m.t1]}" width="24" alt=""> ${m.t1}`;
-      tr.appendChild(td1);
+      const logos = {
+        "GANG OF MONKEYS": "img/gankofmonkeys.jpg",
+        "LOS 5 RATONES": "img/loscinco.jpg",
+        "BLACK STARS": "img/blackstars.jpg",
+        INVALIDS: "img/invalids.jpg",
+        "WAWITAS SAGACES": "img/wawitas-sagaces.jpg",
+        "BAJITOS PERO SOBERBIOS": "img/bajitosperosoberbios.jpg",
+      };
 
-      // selector de resultado
-      const tdRes=document.createElement("td");
-      const sel=document.createElement("select"); sel.className="select-score";
-      ["","2-0","1-1","0-2"].forEach(v=>{
-        const o=document.createElement("option");
-        o.value=v; o.textContent=v||"--";
-        if(results[i].result===v) o.selected=true;
-        sel.appendChild(o);
-      });
-      sel.addEventListener("change",e=>{results[i].result=e.target.value; saveResults(); updateStandings();});
-      tdRes.appendChild(sel); tr.appendChild(tdRes);
-
-      // equipo 2
-      const td2=document.createElement("td");
-      td2.innerHTML=`<img src="${logos[m.t2]}" width="24" alt=""> ${m.t2}`;
-      tr.appendChild(td2);
-
-      tbody.appendChild(tr);
-    });
-  }
-
-  /* === Renderizar tabla de posiciones con criterios de desempate === */
-  function updateStandings(){
-    const stats={}; teams.forEach(t=>stats[t]={PG:0,PE:0,PP:0,Pts:0,GW:0,GL:0});
-
-    // recorrer resultados y acumular
-    results.forEach(m=>{
-      if(!m.result) return;
-      const [s1,s2] = m.result.split("-").map(Number);
-      if(Number.isNaN(s1)||Number.isNaN(s2)) return;
-
-      let p1=0,p2=0;
-      if(s1>s2){ p1=3; }
-      else if(s2>s1){ p2=3; }
-      else { p1=p2=1; }
-
-      // W/D/L
-      if(p1===3){ stats[m.t1].PG++; stats[m.t2].PP++; }
-      else if(p2===3){ stats[m.t2].PG++; stats[m.t1].PP++; }
-      else { stats[m.t1].PE++; stats[m.t2].PE++; }
-
-      stats[m.t1].Pts += p1; stats[m.t2].Pts += p2;
-
-      stats[m.t1].GW += s1; stats[m.t1].GL += s2;
-      stats[m.t2].GW += s2; stats[m.t2].GL += s1;
-    });
-
-    const rows=Object.entries(stats).map(([team,s])=>({
-      team,
-      ...s,
-      GD: s.GW - s.GL
-    }));
-
-    // Orden inicial: Pts → GD → GW
-    rows.sort((a,b)=> b.Pts-a.Pts || b.GD-a.GD || b.GW-a.GW || a.team.localeCompare(b.team));
-
-    /* === Enfrentamiento directo (2-way tie) === */
-    for(let i=0;i<rows.length-1;i++){
-      const a=rows[i], b=rows[i+1];
-      if(a.Pts===b.Pts && a.GD===b.GD && a.GW===b.GW){
-        // comprobar head-to-head
-        const h2h = results.find(m=> (m.t1===a.team && m.t2===b.team) || (m.t1===b.team && m.t2===a.team));
-        if(h2h && h2h.result){
-          const [x,y]= h2h.result.split("-").map(Number);
-          const aWon = (h2h.t1===a.team && x>y) || (h2h.t2===a.team && y>x);
-          const bWon = (h2h.t1===b.team && x>y) || (h2h.t2===b.team && y>x);
-          if(aWon && !bWon){ rows.splice(i,2,b,a); }
-          else if(bWon && !aWon){ /* keep order */ }
+      /* === Generar rondas (round-robin) === */
+      function buildRounds(list) {
+        const arr = [...list];
+        if (arr.length % 2) arr.push(null); // bye si impares
+        const n = arr.length,
+          rounds = [];
+        for (let r = 0; r < n - 1; r++) {
+          const pairs = [];
+          for (let i = 0; i < n / 2; i++) {
+            const t1 = arr[i],
+              t2 = arr[n - 1 - i];
+            if (t1 && t2) pairs.push({ t1, t2 });
+          }
+          rounds.push(pairs);
+          arr.splice(1, 0, arr.pop()); // rotación
         }
+        return rounds;
       }
-    }
 
-    // pintar tabla
-    const tb=document.querySelector("#standings tbody"); tb.innerHTML="";
-    rows.forEach((row,i)=>{
-      const tr=document.createElement("tr");
-      if(i<PLAYOFF_SLOTS) tr.classList.add("playoff");
-      // marcar empates en slots 1-3 tras todos los criterios (solo si igual Pts,GD,GW)
-      if(i>0){
-        const prev=rows[i-1];
-        if(row.Pts===prev.Pts && row.GD===prev.GD && row.GW===prev.GW && ((i<PLAYOFF_SLOTS)||(i-1<PLAYOFF_SLOTS))){
-          tr.classList.add("tie");
-          const prevTr=tb.querySelectorAll("tr")[i-1];
-          if(prevTr) prevTr.classList.add("tie");
+      /* Fechas de juego */
+      const dates = [
+        "2025-07-14",
+        "2025-07-16",
+        "2025-07-18",
+        "2025-07-19",
+        "2025-07-20",
+      ];
+
+      const rawRounds = buildRounds(teams);
+      const schedule = [];
+      dates.forEach((d, i) =>
+        rawRounds[i].forEach((m) =>
+          schedule.push({ r: i + 1, d, t1: m.t1, t2: m.t2 }),
+        ),
+      );
+
+      // Asignar resultados estáticos a los partidos
+      const results = schedule.map((match, index) => ({
+        ...match,
+        result: matchResults[index] || "",
+      }));
+
+      /* === Referencias DOM === */
+      const tabs = document.querySelectorAll(".tab-btn");
+      const scheduleSection = document.querySelector(".schedule-section");
+      const standingsSection = document.querySelector(".standings-section");
+      const scheduleTitle = document.getElementById("schedule-title");
+
+      /* === Navegación por pestañas === */
+      let selectedTab = "round-1";
+      function selectTab(tab) {
+        selectedTab = tab;
+        tabs.forEach((b) =>
+          b.classList.toggle("active", b.dataset.tab === tab),
+        );
+        if (tab === "standings") {
+          scheduleSection.style.display = "none";
+          standingsSection.style.display = "block";
+        } else {
+          scheduleSection.style.display = "block";
+          standingsSection.style.display = "none";
+          scheduleTitle.textContent = `Fixture – Ronda ${tab.split("-")[1]}`;
         }
+        renderSchedule();
       }
-      tr.innerHTML=`<td>${i+1}</td>
-                    <td><img src="${logos[row.team]}" width="20" alt=""> ${row.team}</td>
-                    <td>${row.PG}</td><td>${row.PE}</td><td>${row.PP}</td>
-                    <td>${row.GW}</td><td>${row.GD}</td><td>${row.Pts}</td>`;
-      tb.appendChild(tr);
-    });
-  }
+      tabs.forEach((b) =>
+        b.addEventListener("click", () => selectTab(b.dataset.tab)),
+      );
 
-  /* === Inicio === */
-  selectTab("round-1");
-  updateStandings();
-  </script>
-</body>
+      /* === Renderizar fixture === */
+      function renderSchedule() {
+        const tbody = document.querySelector("#schedule tbody");
+        tbody.innerHTML = "";
+        results.forEach((m, i) => {
+          if (
+            selectedTab.startsWith("round-") &&
+            m.r !== +selectedTab.split("-")[1]
+          )
+            return;
+          const tr = document.createElement("tr");
+
+          // fecha y ronda
+          ["d", "r"].forEach((f) => {
+            const td = document.createElement("td");
+            td.textContent = m[f];
+            tr.appendChild(td);
+          });
+
+          // equipo 1
+          const td1 = document.createElement("td");
+          td1.innerHTML = `<img src="${logos[m.t1]}" width="24" alt=""> ${m.t1}`;
+          tr.appendChild(td1);
+
+          // resultado estático
+          const tdRes = document.createElement("td");
+          tdRes.textContent = m.result || "--";
+          tr.appendChild(tdRes);
+
+          // equipo 2
+          const td2 = document.createElement("td");
+          td2.innerHTML = `<img src="${logos[m.t2]}" width="24" alt=""> ${m.t2}`;
+          tr.appendChild(td2);
+
+          tbody.appendChild(tr);
+        });
+      }
+
+      /* === Renderizar tabla de posiciones con criterios de desempate === */
+      function updateStandings() {
+        const stats = {};
+        teams.forEach(
+          (t) => (stats[t] = { PG: 0, PE: 0, PP: 0, Pts: 0, GW: 0, GL: 0 }),
+        );
+
+        // recorrer resultados y acumular
+        results.forEach((m) => {
+          if (!m.result) return;
+          const [s1, s2] = m.result.split("-").map(Number);
+          if (Number.isNaN(s1) || Number.isNaN(s2)) return;
+
+          let p1 = 0,
+            p2 = 0;
+          if (s1 > s2) {
+            p1 = 3;
+          } else if (s2 > s1) {
+            p2 = 3;
+          } else {
+            p1 = p2 = 1;
+          }
+
+          // W/D/L
+          if (p1 === 3) {
+            stats[m.t1].PG++;
+            stats[m.t2].PP++;
+          } else if (p2 === 3) {
+            stats[m.t2].PG++;
+            stats[m.t1].PP++;
+          } else {
+            stats[m.t1].PE++;
+            stats[m.t2].PE++;
+          }
+
+          stats[m.t1].Pts += p1;
+          stats[m.t2].Pts += p2;
+
+          stats[m.t1].GW += s1;
+          stats[m.t1].GL += s2;
+          stats[m.t2].GW += s2;
+          stats[m.t2].GL += s1;
+        });
+
+        const rows = Object.entries(stats).map(([team, s]) => ({
+          team,
+          ...s,
+          GD: s.GW - s.GL,
+        }));
+
+        // Orden inicial: Pts → GD → GW
+        rows.sort(
+          (a, b) =>
+            b.Pts - a.Pts ||
+            b.GD - a.GD ||
+            b.GW - a.GW ||
+            a.team.localeCompare(b.team),
+        );
+
+        /* === Enfrentamiento directo (2-way tie) === */
+        for (let i = 0; i < rows.length - 1; i++) {
+          const a = rows[i],
+            b = rows[i + 1];
+          if (a.Pts === b.Pts && a.GD === b.GD && a.GW === b.GW) {
+            // comprobar head-to-head
+            const h2h = results.find(
+              (m) =>
+                (m.t1 === a.team && m.t2 === b.team) ||
+                (m.t1 === b.team && m.t2 === a.team),
+            );
+            if (h2h && h2h.result) {
+              const [x, y] = h2h.result.split("-").map(Number);
+              const aWon =
+                (h2h.t1 === a.team && x > y) || (h2h.t2 === a.team && y > x);
+              const bWon =
+                (h2h.t1 === b.team && x > y) || (h2h.t2 === b.team && y > x);
+              if (aWon && !bWon) {
+                rows.splice(i, 2, a, b); // 'a' won, so it should be first. The sort is descending, so if a wins, it should stay.
+              } else if (bWon && !aWon) {
+                rows.splice(i, 2, b, a); // 'b' won, so it moves up.
+              }
+            }
+          }
+        }
+
+        // pintar tabla
+        const tb = document.querySelector("#standings tbody");
+        tb.innerHTML = "";
+        rows.forEach((row, i) => {
+          const tr = document.createElement("tr");
+          if (i < PLAYOFF_SLOTS) tr.classList.add("playoff");
+          // marcar empates en slots 1-3 tras todos los criterios (solo si igual Pts,GD,GW)
+          if (i > 0) {
+            const prev = rows[i - 1];
+            if (
+              row.Pts === prev.Pts &&
+              row.GD === prev.GD &&
+              row.GW === prev.GW &&
+              (i < PLAYOFF_SLOTS || i - 1 < PLAYOFF_SLOTS)
+            ) {
+              tr.classList.add("tie");
+              const prevTr = tb.querySelectorAll("tr")[i - 1];
+              if (prevTr) prevTr.classList.add("tie");
+            }
+          }
+          tr.innerHTML = `<td>${i + 1}</td>
+                         <td><img src="${logos[row.team]}" width="20" alt=""> ${row.team}</td>
+                         <td>${row.PG}</td><td>${row.PE}</td><td>${row.PP}</td>
+                         <td>${row.GW}</td><td>${row.GD}</td><td>${row.Pts}</td>`;
+          tb.appendChild(tr);
+        });
+      }
+
+      /* === Inicio === */
+      selectTab("round-1");
+      updateStandings();
+    </script>
+  </body>
 </html>
-
-
-
-
 
