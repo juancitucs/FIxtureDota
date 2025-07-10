@@ -317,3 +317,25 @@ td img {
 .schedule-section table td {
   font-size: 0.85em;
 }
+.criteria-text {
+  display: inline-block;
+  font-size: 0.85rem;
+  background-color: #31302c;  
+  color: #ffffff;              
+  padding: 0.2rem 0.5rem;
+  margin-right: 0.5rem;
+  border-radius: 0.25rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.criteria-text .highlight {
+  display: inline-block;
+  font-size: 0.85rem;
+  background-color: #ffd54f;   
+  color: #212121;             
+  padding: 0.2rem 0.5rem;
+  margin-right: 0.5rem;
+  border-radius: 0.25rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
