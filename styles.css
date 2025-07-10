@@ -12,7 +12,11 @@
   --row-alt: rgba(255, 255, 255, 0.04);
   --row-hover: rgba(255, 255, 255, 0.1);
 }
-
+.header-logo {
+  width: 150px;     /* tamaño inicial; cámbialo por 30px, 80px, etc. */
+  height: auto;    /* mantiene la proporción */
+  margin-left: 0.75rem;
+}
 /* ---------- Fondo ---------- */
 body {
   margin: 0;
