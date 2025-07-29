@@ -186,7 +186,7 @@
       document.getElementById('score-playin').textContent = playinScore || '1 - 2';
 
       // Determina el ganador del play-in y lo pone en la final
-      let finalTeam2 = '-';
+      let finalTeam2 = 'INVALIDS';
       if (playinScore) {
         const [s1, s2] = playinScore.split('-').map(Number);
         const winner = s1 > s2 ? teams.top2 : teams.top3;
